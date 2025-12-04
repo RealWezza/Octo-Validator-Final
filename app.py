@@ -2,19 +2,25 @@ import streamlit as st
 import re
 import os
 from google import genai
+from google.genai import types
 from google.genai.errors import APIError
 import json
 
 # ==========================================
-# 1. CONFIGURATION
+# 1. CONFIGURATION & SECURE API KEY
 # ==========================================
 st.set_page_config(page_title="Oct Validator", page_icon="🐙", layout="centered")
 
-# 👇 مفتاح الـ API
-API_KEY = "AIzaSyAY6iisYKpbpNCJkkakh4E-u01g0_RRd_I"
+# محاولة جلب المفتاح من "خزنة" Streamlit السرية
+# سواء كانت ملف secrets.toml على جهازك أو Secrets في السيرفر
+try:
+    API_KEY = st.secrets["GEMINI_API_KEY"]
+except FileNotFoundError:
+    st.error("⚠️ لم يتم العثور على المفتاح السري! تأكد من إعداد ملف .streamlit/secrets.toml")
+    st.stop()
 
-if API_KEY and API_KEY != "AIzaSyAY6iisYKpbpNCJkkakh4E-u01g0_RRd_I":
-    os.environ["GEMINI_API_KEY"] = API_KEY
+# إعداد البيئة
+os.environ["GEMINI_API_KEY"] = API_KEY
 
 # ==========================================
 # 2. CSS STYLING
@@ -285,12 +291,26 @@ def init_gemini_client():
 def get_gemini_verdict(name, desc, section, error_context):
     client = init_gemini_client()
     if not client: return "⚠️ API Key Missing"
+    
     prompt = f"Context: Item: {name}, Desc: {desc}, Section: {section}, Error: {error_context}. Task: Check if this is a TRUE culinary/logic error. Output JSON: {{'Verdict': 'Valid' or 'Invalid', 'Reason': '...'}}"
+    
     try:
-        response = client.models.generate_content(model='gemini-2.5-flash', contents=prompt)
+        # تفعيل البحث للحكم على المنتج
+        response = client.models.generate_content(
+            model='gemini-2.0-flash', 
+            contents=prompt,
+            config=types.GenerateContentConfig(
+                tools=[types.Tool(google_search=types.GoogleSearch())],
+                response_mime_type="text/plain" 
+            )
+        )
+        # السطرين الجايين دول هما اللي كانوا ناقصين عندك
         return response.text.replace("```json", "").replace("```", "")
-    except Exception as e: return f"AI Error: {e}"
-
+        
+    except Exception as e:
+        # وده كمان كان ناقص (عشان لو حصل ايرور)
+        return f"AI Error: {e}"
+        
 def handle_chat_input():
     user_msg = st.session_state.chat_input_widget
     st.session_state.chat_input_widget = "" 
@@ -299,7 +319,14 @@ def handle_chat_input():
         try:
             history_context = "\n".join([f"{m['role']}: {m['text']}" for m in st.session_state.chat_history[-6:]])
             full_prompt = f"Previous Chat Context:\n{history_context}\n\nUser Question: {user_msg}\nAssistant:"
-            res = client.models.generate_content(model='gemini-2.5-flash', contents=full_prompt)
+            # تفعيل البحث للشات
+            res = client.models.generate_content(
+                model='gemini-2.0-flash',
+                contents=full_prompt,
+                config=types.GenerateContentConfig(
+                    tools=[types.Tool(google_search=types.GoogleSearch())]
+                )
+            )
             st.session_state.chat_history.append({"role": "user", "text": user_msg})
             st.session_state.chat_history.append({"role": "ai", "text": res.text})
         except Exception as e: st.error(f"Chat Error: {e}")
