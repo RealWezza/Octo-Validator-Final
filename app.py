@@ -17,124 +17,27 @@ if API_KEY and API_KEY != "AIzaSyANYHM3m11AGkdEYWaFQ6EdRMmPbvuo5fc":
     os.environ["GEMINI_API_KEY"] = API_KEY
 
 # ==========================================
-# 2. CSS STYLING (التصميم البرتقالي المعتمد)
+# 2. CSS STYLING
 # ==========================================
 st.markdown("""
 <style>
-    /* إخفاء عناصر التحكم */
     header, footer {visibility: hidden !important;}
-    
-    /* الخلفية: تدرج برتقالي هادئ */
-    .stApp {
-        background: linear-gradient(135deg, #fff5ec 0%, #ffe0cc 100%);
-        color: #333;
-    }
-
-    /* كارت المحتوى الرئيسي */
-    div[data-testid="stForm"] {
-        background-color: #FFFBF7; 
-        border-radius: 20px;
-        box-shadow: 0 10px 25px rgba(230, 81, 0, 0.08);
-        border: 2px solid #FFE0B2;
-        padding: 2rem;
-    }
-
-    /* العناوين والنصوص */
-    div[data-testid="stForm"] h1, label, p, h3 {
-        color: #333 !important;
-    }
-    
-    /* العنوان الرئيسي واللوجو */
-    .main-header {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 15px;
-        margin-bottom: 30px;
-    }
-    .main-title {
-        font-family: 'Helvetica Neue', sans-serif;
-        font-weight: 900;
-        font-size: 3rem;
-        color: #E65100;
-        margin: 0;
-        text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
-    }
-    .octo-logo {
-        font-size: 60px; 
-        filter: drop-shadow(2px 4px 6px rgba(0,0,0,0.2));
-        animation: float 3s ease-in-out infinite;
-    }
-    @keyframes float {
-        0% { transform: translateY(0px); }
-        50% { transform: translateY(-10px); }
-        100% { transform: translateY(0px); }
-    }
-
-    /* حقول الإدخال */
-    .stTextInput input, .stTextArea textarea {
-        background-color: #FFFFFF !important;
-        border: 1px solid #FFCC80 !important;
-        border-radius: 10px !important;
-        color: #333 !important;
-        font-size: 16px !important;
-    }
-    .stTextInput input:focus, .stTextArea textarea:focus {
-        border-color: #EF6C00 !important;
-        box-shadow: 0 0 0 1px #EF6C00 !important;
-    }
-    
-    /* الأزرار */
-    button[kind="primary"] {
-        background: linear-gradient(90deg, #FF6D00, #EF6C00) !important;
-        border: none !important;
-        color: white !important;
-        font-weight: 800 !important;
-        padding: 0.6rem 2rem !important;
-        border-radius: 10px !important;
-        box-shadow: 0 4px 10px rgba(239, 108, 0, 0.3);
-    }
-    button[kind="secondary"] {
-        border: 2px solid #EF6C00 !important;
-        color: #EF6C00 !important;
-        background: white !important;
-        font-weight: 800 !important;
-        border-radius: 10px !important;
-    }
-
-    /* كروت النتائج */
-    .result-card {
-        margin-top: 25px;
-        padding: 20px;
-        background-color: white;
-        border-radius: 12px;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-        border-left: 6px solid;
-        color: #333;
-    }
+    .stApp {background: linear-gradient(135deg, #fff5ec 0%, #ffe0cc 100%); color: #333;}
+    div[data-testid="stForm"] { background-color: #FFFBF7; border-radius: 20px; box-shadow: 0 10px 25px rgba(230, 81, 0, 0.08); border: 2px solid #FFE0B2; padding: 2rem; }
+    div[data-testid="stForm"] h1, label, p, h3 { color: #333 !important; }
+    .main-title { font-family: 'Helvetica Neue', sans-serif; font-weight: 900; font-size: 3rem; color: #E65100; margin: 0; text-shadow: 1px 1px 2px rgba(0,0,0,0.1); }
+    .octo-logo { font-size: 60px; filter: drop-shadow(2px 4px 6px rgba(0,0,0,0.2)); animation: float 3s ease-in-out infinite; }
+    @keyframes float { 0% { transform: translateY(0px); } 50% { transform: translateY(-10px); } 100% { transform: translateY(0px); } }
+    .stTextInput input, .stTextArea textarea { background-color: #FFFFFF !important; border: 1px solid #FFCC80 !important; border-radius: 10px !important; color: #000000 !important; font-size: 16px !important; }
+    .stTextInput input:focus, .stTextArea textarea:focus { border-color: #EF6C00 !important; box-shadow: 0 0 0 1px #EF6C00 !important; }
+    button[kind="primary"] { background: linear-gradient(90deg, #FF6D00, #EF6C00) !important; border: none !important; color: white !important; font-weight: 800 !important; padding: 0.6rem 2rem !important; border-radius: 10px !important; box-shadow: 0 4px 10px rgba(239, 108, 0, 0.3); }
+    button[kind="secondary"] { border: 2px solid #EF6C00 !important; color: #EF6C00 !important; background: white !important; font-weight: 800 !important; border-radius: 10px !important; }
+    .result-card { margin-top: 25px; padding: 20px; background-color: white; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border-left: 6px solid; color: #333; }
     .valid { border-color: #28a745; background-color: #F1F8E9; }
-    .error { border-color: #dc3545; background-color: #FFEBEE; }
-
-    /* زر الشات العائم */
-    div[data-testid="stPopover"] {
-        position: fixed; bottom: 20px; left: 20px; z-index: 9999;
-    }
-    div[data-testid="stPopover"] button {
-        background-color: #2C3E50 !important;
-        color: white !important;
-        border-radius: 12px !important;
-        border: none !important;
-        padding: 10px 20px !important;
-        font-weight: bold !important;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-        width: auto !important;
-        height: auto !important;
-        display: flex; align-items: center; gap: 8px;
-    }
-    div[data-testid="stPopover"] button::after {
-        content: "✨ Gemini"; font-size: 16px;
-    }
-
+    .error { border-color: #dc3545; background-color: #FFF5F5; }
+    div[data-testid="stPopover"] { position: fixed; bottom: 20px; left: 20px; z-index: 9999; }
+    div[data-testid="stPopover"] button { background-color: #2C3E50 !important; color: white !important; border-radius: 12px !important; border: none !important; padding: 10px 20px !important; font-weight: bold !important; box-shadow: 0 4px 12px rgba(0,0,0,0.2); width: auto !important; height: auto !important; display: flex; align-items: center; gap: 8px; }
+    div[data-testid="stPopover"] button::after { content: "✨ Gemini"; font-size: 16px; }
     #copyright { position: fixed; bottom: 10px; right: 20px; font-size: 12px; color: #888; }
 </style>
 """, unsafe_allow_html=True)
@@ -149,17 +52,17 @@ if 'last_res' not in st.session_state: st.session_state.last_res = None
 if 'chat_input_widget' not in st.session_state: st.session_state.chat_input_widget = ""
 
 # ==========================================
-# 4. KNOWLEDGE BASE (DATA)
+# 4. KNOWLEDGE BASE
 # ==========================================
 AD_WORDS_LIST = ["creamy","tender","refreshing","fiery","tropical","organic","crispy","aromatic","crunchy","buttery","juicy","fudgy","zesty","chewy","moist","handcrafted","fresh","whipped","classic","pure","soft","natural","seasonal","squeezed","premium","crusty","carbonated","flaky","fizzy","thick","thin","spiced","healthy","flavored","chunky","sweet","golden","salty","nutty","perfect for"]
 GENERIC_PHRASES = ["perfectly paired with","often served with","typically","usually served with","traditionally","mighty with","ideal for","great for","can be with","maybe for","suggested with","suggestion","try it with","example","such as","likely"]
 CHOICE_INDICATORS = ["choice","choose","selection","select","option","pick","اختيار","اختار", "بين", "between"]
 CHOICE_SEPARATORS = [" or ", "/", "\\", " أو ", " أم "]
-FLUFF_WORDS = ["with","and","in","the","a","an","of","for","to","served","plate","dish","meal","platter","box","bowl","piece","pcs","nice","delicious","tasty","yummy","amazing","best","good","great","hot","cold","warm","special","signature","authentic","original","traditional","famous","rich","favorite","cooked","prepared","enjoy","try","our","مع","و","في","ال","طبق","وجبة","صحن","قطعة","لذيذ","شهي","رائع","مميز","ساخن","بارد","أصلي","تقليدي","فاخر","غني","مفضل","مطبوخ","مجهز","استمتع","جرب","مكونات","طعم","نكهة","خلطة","تتبيلة","محضر","طريقة","خاصة","من","على"]
+FLUFF_WORDS = ["with","and","in","the","a","an","of","for","to","served","plate","dish","meal","platter","box","bowl","piece","pcs","nice","delicious","tasty","yummy","amazing","best","good","great","hot","cold","warm","special","signature","authentic","original","traditional","famous","rich","favorite","cooked","prepared","enjoy","try","our","same as","نفس", "sauce", "top", "topping", "mix"] # Added more fluff
 
 ITEM_CATEGORIES = {
     "DRINK": ["juice", "soda", "water", "coffee", "tea", "cola", "pepsi", "عصير", "مشروب", "ماء", "قهوة", "شاي"],
-    "SWEET": ["cake", "ice cream", "cookie", "chocolate", "knafeh", "basbousa", "baklava", "dessert", "كيك", "آيس كريم", "شوكولاتة", "حلويات", "كنافة", "بسبوسة", "بقلاوة", "crepe", "waffle", "كريب", "وافل", "pistachio", "فستق", "صوص حلو", "sweet sauce", "caramel", "كريم"],
+    "SWEET": ["cake", "ice cream", "cookie", "chocolate", "knafeh", "basbousa", "baklava", "dessert", "كيك", "آيس كريم", "شوكولاتة", "حلويات", "كنافة", "بسبوسة", "بقلاوة", "crepe", "waffle", "krip", "wafl", "pistachio", "caramel", "كريب", "وافل", "فستق", "صوص حلو"],
     "SAVORY_MAIN": ["chicken", "beef", "burger", "pizza", "sandwich", "shawarma", "rice", "pasta", "steak", "grill", "kebab", "meat", "zinger", "دجاج", "لحم", "برجر", "بيتزا", "شاورما", "أرز", "مكرونة", "مشوي"],
 }
 SECTION_CONFLICTS = {
@@ -181,51 +84,18 @@ INCOMPATIBLE_PAIRS = [
 ]
 FORBIDDEN_LIST = ["wine","liquor","beer","tequila","vodka","ham","pig","whisky","bacon","chicharrón","cigarettes","e-cigarettes","vape","shisha","hooka flavors","alcohol","pork","lechon","tobacco","slave","hookah","dirty","naughty"]
 OFFER_KEYWORDS = ["offer","special offer","buy 1","buy one","combo","discount"]
-OFFER_EXCEPTIONS = ["share box","value meal","saving meal","free add-on","free item","combo","وجبة توفير","وجبة قيمة","صندوق مشاركة","كومبو"]
+OFFER_EXCEPTIONS = ["share box","value meal","family meal"]
 INEDIBLE_ITEMS = ["iphone","samsung","mobile","laptop","mouse","car","bike","tire","chair","table","plastic","metal","glass","hooka tube","charcoal holder"]
 SAFE_BACON = ["beef","halal","turkey","veal","ديك رومي","بقري","حلال"]
 SAFE_CURACAO = ["syrup","flavor","شراب","نكهة"]
 INEDIBLE_PATTERN = r'\b(' + '|'.join(re.escape(w) for w in INEDIBLE_ITEMS) + r')\b'
 
-
 # ==========================================
-# 5. LOGIC FUNCTIONS (المدقق)
+# 5. LOGIC FUNCTIONS
 # ==========================================
 def normalize_text(text): return text.lower().strip() if text else ""
 
-def check_choices(name, desc, src):
-    # 1. Create regex pattern for indicators
-    choice_pattern = r'\b(' + '|'.join(re.escape(w) for w in CHOICE_INDICATORS) + r')\b'
-    has_indicator = bool(re.search(choice_pattern, desc))
-
-    # 2. Check for separators
-    has_standard_sep = any(s in desc for s in CHOICE_SEPARATORS)
-    
-    # 3. AND logic: 'and' is a separator ONLY if 'between' exists
-    has_between = "between" in desc or "بين" in desc
-    has_and_sep = has_between and (" and " in desc or " و " in desc)
-
-    # 4. Logic Flow
-    if not (has_indicator or has_standard_sep or has_and_sep):
-        return {"status": "none"}
-
-    if has_indicator and not (has_standard_sep or has_and_sep):
-         return {"status": "undefined"} 
-
-    # If valid choices found
-    if src == "Main Menu":
-        return {"status": "defined_valid"}
-    else: # Sep Sheet
-        # Check if separators exist in Name (simple check)
-        name_has_sep = any(s in name for s in CHOICE_SEPARATORS)
-        if name_has_sep: return {"status": "defined_valid"}
-        return {"status": "defined_error_sep"}
-
-
 def check_validation(name, desc, section, source):
-    """
-    Return: (Status, Title, Msg, Action_Key, Suggestion_Data)
-    """
     n, d, s = normalize_text(name), normalize_text(desc), normalize_text(section)
     
     # 1. Forbidden
@@ -236,7 +106,7 @@ def check_validation(name, desc, section, source):
     
     # 2. Inedible
     match = re.search(INEDIBLE_PATTERN, d)
-    if match: return ("ERROR", "Non-Food Item", f"Description contains inedible item: '{match.group(1)}'", "DELETE Description & Get from Library", None)
+    if match: return ("ERROR", "Non-Food Item", f"Description contains inedible item: '{match.group(1)}'", "DELETE ITEM Description", None)
 
     # 3. Section Mismatch
     if s:
@@ -256,11 +126,11 @@ def check_validation(name, desc, section, source):
              action = "DELETE ITEM" if source == "Main Menu" else "DELETE Description & Get from Library"
              return ("ERROR", "Mismatch", f"Conflict between '{pair['a'][0]}' and ingredients.", action, None)
     for group in CONFLICT_GROUPS:
-        if isinstance(group, dict): # Sweet vs Savory
+        if isinstance(group, dict):
             if any(w in n for w in group['a']) and any(w in d for w in group['b']):
                 action = "DELETE ITEM" if source == "Main Menu" else "DELETE Description & Get from Library"
                 return ("ERROR", "Mismatch", "Sweet item paired with savory ingredients.", action, None)
-        else: # Protein
+        else:
             p_name = next((w for w in group if w in n), None)
             p_desc = next((w for w in group if w in d), None)
             if p_name and p_desc and p_name != p_desc:
@@ -271,8 +141,11 @@ def check_validation(name, desc, section, source):
     if any(w in (n+d) for w in OFFER_KEYWORDS) and not any(e in (n+d) for e in OFFER_EXCEPTIONS):
         return ("ERROR", "Offer Detected", "Item appears to be a promotion/offer.", "DELETE ITEM", None)
     
-    # 6. Generic / No Value
-    if len(d) < 3 or "same as" in d: return ("ERROR", "No Value", "Description adds no value.", "DELETE Description & Get from Library", None)
+    # 6. No Value Added (Updated Logic Below)
+    if is_no_value(n, d):
+        return ("ERROR", "No Value", "Description adds no value.", "DELETE Description & Get from Library", None)
+
+    # 7. Generic
     if "likely" in d: 
         action = "DELETE ITEM" if source == "Main Menu" else "DELETE Description & Get from Library"
         return ("ERROR", "Generic", "Vague description (likely).", action, None)
@@ -286,7 +159,7 @@ def check_validation(name, desc, section, source):
         action = "DELETE ITEM" if source == "Main Menu" else "DELETE Description & Get from Library"
         return ("ERROR", "Generic", f"Contains suggestion: '{gen}'", action, None)
 
-    # 7. Choices (Fixed in this version)
+    # 8. Choices
     chk = check_choices(n, d, source)
     if chk["status"] == "undefined": 
         action = "DELETE ITEM" if source == "Main Menu" else "DELETE Description (Leave Empty)"
@@ -296,18 +169,49 @@ def check_validation(name, desc, section, source):
 
     return ("VALID", "Valid Item", "Content looks good.", "None", None)
 
+def check_choices(name, desc, src):
+    choice_pattern = r'\b(' + '|'.join(re.escape(w) for w in CHOICE_INDICATORS) + r')\b'
+    has_indicator = bool(re.search(choice_pattern, desc))
+    has_standard_sep = any(s in desc for s in CHOICE_SEPARATORS)
+    has_between = "between" in desc or "بين" in desc
+    has_and_sep = has_between and (" and " in desc or " و " in desc)
+    if not (has_indicator or has_standard_sep or has_and_sep): return {"status": "none"}
+    if has_indicator and not (has_standard_sep or has_and_sep): return {"status": "undefined"} 
+    temp_desc = desc.replace(" and ", " / ").replace(" و ", " / ")
+    parts = re.split(r'(\/| or |\\| أو | أم )', temp_desc)
+    match = any(len(p.strip()) > 2 and p.strip().lower() in name for p in parts if p.strip() not in CHOICE_SEPARATORS)
+    if src == "Main Menu": return {"status": "defined_valid"}
+    else: name_has_sep = any(s in name for s in CHOICE_SEPARATORS); return {"status": "defined_valid"} if name_has_sep else {"status": "defined_error_sep"}
+
+# *** FIXED: Smart "No Value" Logic ***
 def is_no_value(name, desc):
+    # 1. Immediate Fail: Literal "Same As"
     if "same as" in desc or "نفس" in desc: return True 
+
+    # 2. Immediate Pass: If it has "Ad Words" or "Flavor"
     if "flavored" in desc or "flavor" in desc: return False
     for word in AD_WORDS_LIST:
-        if word in desc: return False
-    clean = desc
-    for t in re.split(r'[^\w]+', name): 
-        if len(t)>1: clean = re.sub(rf'\b(ال)?{re.escape(t)}\b', "", clean)
-    fluff_and_same_as = FLUFF_WORDS + ["same as", "نفس"] 
-    for w in fluff_and_same_as: 
-        clean = re.sub(rf'\b{re.escape(w)}\b', "", clean)
-    return len(re.sub(r'[^\w]+', "", clean).strip()) < 2
+        if re.search(rf'\b{re.escape(word)}\b', desc): return False
+
+    # 3. Cleaning Logic (Token based)
+    # Get tokens from name (unique words, >1 char)
+    name_tokens = set(t for t in re.split(r'\W+', name) if len(t) > 1)
+    
+    # Clean description
+    clean_desc = desc
+    # Remove fluff words (Whole words only)
+    for fluff in FLUFF_WORDS:
+        clean_desc = re.sub(rf'\b{re.escape(fluff)}\b', '', clean_desc)
+    
+    # Remove Name tokens from description
+    for token in name_tokens:
+        clean_desc = re.sub(rf'\b{re.escape(token)}\b', '', clean_desc)
+        
+    # 4. Check remaining length (ignoring spaces/punctuation)
+    remaining = re.sub(r'\W+', '', clean_desc).strip()
+    
+    # If almost nothing is left (< 3 chars), then it adds NO value
+    return len(remaining) < 3
 
 def get_action_text(key, src, name, suggestion=None):
     if key == "MOVE_OR_CREATE": 
@@ -333,7 +237,7 @@ def generate_comment(title, msg, action, src, name, key):
     elif "DELETE Description (Leave Empty)" in action: return f'I deleted item\'s description "{name}" because of {reason} in {src}.'
     elif "DELETE Description" in action: return f'I deleted item\'s description "{name}" because of {reason} in {src}.'
     elif "MOVE" in action:
-        return f'I moved item "{name}" to section "**{key if key else "appropriate"}**" because of {reason} in {src}.' if "MOVE" in action else ""
+        return f'I moved item "{name}" to section "**{key if key else "appropriate"}**" because of {reason} in {src}.'
         
     return f"Action taken: {action}"
 
@@ -366,13 +270,11 @@ def handle_chat_input():
         try:
             if st.session_state.gemini_chat is None:
                 st.session_state.gemini_chat = client.chats.create(model='gemini-2.5-flash')
-            
             res = st.session_state.gemini_chat.send_message(user_msg)
             st.session_state.chat_history.append({"role": "user", "text": user_msg})
             st.session_state.chat_history.append({"role": "ai", "text": res.text})
             st.session_state.chat_input_widget = ""
-        except Exception as e:
-            st.error(f"Chat Error: {e}")
+        except Exception as e: st.error(f"Chat Error: {e}")
 
 # ==========================================
 # 7. UI LAYOUT
@@ -387,17 +289,13 @@ st.markdown("""
 
 with st.form("validation_form"):
     st.markdown("### Item Details")
-    
     c1, c2 = st.columns([1, 2])
     with c1: source = st.radio("Source", ["Main Menu", "Sep Sheet"], horizontal=True)
     with c2: section = st.text_input("Section Name (Optional)", placeholder="e.g., Main Course")
-    
     st.markdown("")
     name = st.text_input("Item Name", placeholder="Enter the item name")
     desc = st.text_area("Item Description", placeholder="Enter ingredients or description", height=100)
-    
     st.markdown("---")
-    
     b1, b2 = st.columns([1, 1])
     with b1: validate_btn = st.form_submit_button("VALIDATE ITEM", type="primary", use_container_width=True)
     with b2: gemini_btn = st.form_submit_button("GEMINI CHECK", type="secondary", use_container_width=True)
@@ -419,12 +317,8 @@ if gemini_btn:
 
 if st.session_state.validation_complete:
     rtype, title, msg, action_key, suggestion = st.session_state.last_res
-    card_class = "valid" if rtype == "VALID" else "error"
-    icon = "✅" if rtype == "VALID" else "⛔"
-    title_color = "#28a745" if rtype == "VALID" else "#dc3545"
-    
+    card_class, icon, title_color = ("valid", "✅", "#28a745") if rtype == "VALID" else ("error", "⛔", "#dc3545")
     final_action_text = get_action_text(action_key, source, name, suggestion)
-
     st.markdown(f"""
     <div class="result-card {card_class}">
         <h3 style='margin-top:0; color:{title_color}; display:flex; align-items:center; gap:10px;'><span style='font-size:1.3em;'>{icon}</span> {title}</h3>
@@ -434,9 +328,7 @@ if st.session_state.validation_complete:
         </div>
     </div>
     """, unsafe_allow_html=True)
-    
     if rtype != "VALID":
-        # Pass suggestion as 'key' argument for MOVE action comment generation
         comment = generate_comment(title, msg, final_action_text, source, name, suggestion)
         st.code(comment, language="text")
 
