@@ -5,6 +5,7 @@ from google import genai
 from google.genai import types
 from google.genai.errors import APIError
 import json
+import pandas as pd  # 👈 ضيف السطر ده عشان نستدعي مكتبة الجداول
 
 # ==========================================
 # 1. CONFIGURATION & SECURE API KEY
@@ -27,7 +28,14 @@ os.environ["GEMINI_API_KEY"] = API_KEY
 # ==========================================
 st.markdown("""
 <style>
-    header, footer {visibility: hidden !important;}
+/* إخفاء الشريط الملون العلوي والفوتر */
+    header[data-testid="stHeader"] {
+        background-color: transparent;
+    }
+    footer {visibility: hidden !important;}
+    
+    /* إخفاء قائمة الخيارات (الثلاث نقط) لو عايز، بس سيب زر السايد بار */
+    #MainMenu {visibility: hidden;}
     .stApp {background: #EEEEEE;}
     div[data-testid="stForm"] { background-color: #FFFBF7; border-radius: 20px; box-shadow: 0 10px 25px rgba(230, 81, 0, 0.08); border: 3px solid #FFA500; padding: 2rem; }
     div[data-testid="stForm"] h1, label, p, h3 { color: #333 !important; }
@@ -100,7 +108,25 @@ st.markdown("""
     div[data-testid="stPopover"] button { background-color: #2C3E50 !important; color: white !important; border-radius: 12px !important; border: none !important; padding: 10px 20px !important; font-weight: bold !important; box-shadow: 0 4px 12px rgba(0,0,0,0.2); width: auto !important; height: auto !important; display: flex; align-items: center; gap: 8px; }
     div[data-testid="stPopover"] button::after { content: "✨ Gemini"; font-size: 16px; }
     #copyright { position: fixed; bottom: 10px; right: 20px; font-size: 12px; color: Black; }
+/* --- 9. إصلاح زر فتح القائمة الجانبية (Sidebar) --- */
+    /* تكبير الزر وتلوينه ليكون واضحاً عند الإغلاق */
+    [data-testid="stSidebarCollapsedControl"] {
+        background-color: #FF5A00 !important; /* خلفية برتقالي */
+        color: white !important; /* سهم أبيض */
+        border-radius: 0 10px 10px 0 !important; /* شكل انسيابي */
+        padding: 10px !important;
+        margin-top: 10px !important;
+        box-shadow: 2px 2px 10px rgba(0,0,0,0.2) !important;
+        height: 50px !important;
+        width: 50px !important;
+    }
+    /* تكبير أيقونة السهم جوه الزر */
+    [data-testid="stSidebarCollapsedControl"] svg {
+        height: 30px !important;
+        width: 30px !important;
+    }
 </style>
+
 """, unsafe_allow_html=True)
 
 # ==========================================
@@ -332,7 +358,7 @@ def handle_chat_input():
         except Exception as e: st.error(f"Chat Error: {e}")
 
 # ==========================================
-# 7. UI LAYOUT (سنتر اللوجو والاسم)
+# 7. UI LAYOUT
 # ==========================================
 import base64
 
@@ -341,10 +367,92 @@ def get_base64_of_bin_file(bin_file):
         data = f.read()
     return base64.b64encode(data).decode()
 
-# محاولة قراءة الصورة وعرضها في المنتصف مع النص
+# --- 1. EXCEL UPLOADER (SIDEBAR) ---
+# هذا الجزء منفصل الآن وسليم
+# --- 1. EXCEL UPLOADER & BULK VALIDATION (SIDEBAR) ---
+# --- 1. EXCEL UPLOADER & BULK VALIDATION (SIDEBAR) ---
+with st.sidebar:
+    st.header("📂 Bulk Menu Validation")
+    uploaded_file = st.file_uploader("Upload Menu Excel", type=["xlsx", "xls"])
+
+    if uploaded_file:
+        try:
+            # 1. قراءة الملف
+            try:
+                df = pd.read_excel(uploaded_file, sheet_name='Menu_Items', dtype=str, keep_default_na=False)
+            except ValueError:
+                st.error("❌ Error: Tab 'Menu_Items' not found!")
+                st.stop()
+
+            # 2. التأكد من الأعمدة
+            required_columns = ["Name(Eng)", "Description(Eng)"]
+            if not all(col in df.columns for col in required_columns):
+                st.error(f"❌ Columns missing! Need: {required_columns}")
+                st.stop()
+
+            st.success(f"✅ File Loaded: {len(df)} items.")
+
+            # زرار بدء الفحص
+            if st.button("🚀 Start Bulk Check", type="primary"):
+                invalid_items = []
+                progress_bar = st.progress(0)
+                
+                for index, row in df.iterrows():
+                    progress_bar.progress((index + 1) / len(df))
+                    
+                    name = str(row["Name(Eng)"]).strip()
+                    desc = str(row["Description(Eng)"]).strip()
+                    section = str(row.get("Section Name", "")).strip()
+
+                    # --- الفحص الأول: كأنه Main Menu ---
+                    res_m, title_m, msg_m, key_m, sugg_m = check_validation(name, desc, section, "Main Menu")
+                    
+                    # --- الفحص الثاني: كأنه Sep Sheet ---
+                    res_s, title_s, msg_s, key_s, sugg_s = check_validation(name, desc, section, "Sep Sheet")
+
+                    # لو فيه غلطة في أي واحد فيهم، اعتبره Invalid
+                    if res_m != "VALID" or res_s != "VALID":
+                        # تجهيز نصوص الأكشن
+                        action_main = get_action_text(key_m, "Main Menu", name, sugg_m) if res_m != "VALID" else "✅ Valid"
+                        action_sep = get_action_text(key_s, "Sep Sheet", name, sugg_s) if res_s != "VALID" else "✅ Valid"
+                        
+                        # توحيد سبب الخطأ (غالباً هو نفس السبب)
+                        error_type = title_m if res_m != "VALID" else title_s
+                        reason = msg_m if res_m != "VALID" else msg_s
+
+                        invalid_items.append({
+                            "Row": index + 2,
+                            "Item Name": name,
+                            "Description": desc,
+                            "Error Type": error_type,
+                            "Reason": reason,
+                            "Action (If Main Menu)": action_main, # العمود الأول للأكشن
+                            "Action (If Sep Sheet)": action_sep   # العمود الثاني للأكشن
+                        })
+                
+                progress_bar.empty()
+
+                # عرض النتائج
+                st.divider()
+                st.markdown(f"### 📊 Check Results")
+                st.markdown(f"**Total:** {len(df)} | **Issues:** {len(invalid_items)}")
+                
+                if invalid_items:
+                    st.error("Found issues!")
+                    result_df = pd.DataFrame(invalid_items)
+                    st.dataframe(result_df, use_container_width=True)
+                else:
+                    st.success("🎉 Perfect Menu! No errors found.")
+
+        except Exception as e:
+            st.error(f"Error: {e}")
+    
+    st.markdown("---")
+
+# --- 2. LOGO & TITLE (CENTERED) ---
+# هذا الجزء الخاص باللوجو أصبح منفصلاً ليعمل بأمان
 try:
     img_base64 = get_base64_of_bin_file("logo.png")
-    
     st.markdown(
         f"""
         <div style="display: flex; justify-content: center; align-items: center; gap: 15px; margin-top: 20px; margin-bottom: 30px;">
@@ -365,13 +473,13 @@ try:
         unsafe_allow_html=True
     )
 except FileNotFoundError:
-    # بديل في حالة عدم وجود الصورة
     st.markdown("""
         <h1 style='text-align: center; margin-bottom: 30px;'>
             <span style='color: #FF5A00;'>Oct</span> <span style='color: #000000;'>Validator</span> 🐙
         </h1>
     """, unsafe_allow_html=True)
-    st.warning("⚠️ ملف logo.png غير موجود في الفولدر!")
+    # تحذير صامت في الكونسول بدلاً من تشويه الموقع
+    print("⚠️ Warning: logo.png not found.")
 
 
 with st.form("validation_form"):
